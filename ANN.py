@@ -4,7 +4,9 @@ import numpy as np
 #BackPropogation Class
 class BackPropogationNetwork:
 	"""A Back - Propogation Network"""
-
+	#For basic understanding of Neural Networks 
+	# --> http://natureofcode.com/book/chapter-10-neural-networks/
+	# --> http://www.bogotobogo.com/python/python_Neural_Networks_Backpropagation_for_XOR_using_one_hidden_layer.php
 
 	#Class members
 	LayerCount = 0  #It will be a tuple with neuron count in each layer. eg:- (2,2,1) -- 2 nodes in input, 2 in hidden and 1 in output
@@ -72,17 +74,39 @@ class BackPropogationNetwork:
 		#First run the network
 		self.Run(input)
 
-		#Calculate our deltas
+		#Calculate our deltas --> a value which will be added to the weight to give the new weight
 		for index in reversed(range(self.LayerCount)):
+			#For output nodes 
 			if index == self.LayerCount - 1 :
 				#Compare to the target values
 				output_delta = self._LayerOutput[index] - target.T
 				error = np.sum(output_delta**2)
+				#Using derivative function here as we are using sigmoid activation function
+				#Refer the below link for understanding of this gradient calculation or backpropogation 
+				#--> https://visualstudiomagazine.com/Articles/2014/12/01/Back-Propagation-using-Python.aspx?Page=2
 				delta.append(output_delta * self.sgm(self._LayerInput[index],True))
+			#For hidden nodes
 			else:
 				#Compare to the following layer's delta
-				delta_pullback = self.weights(index+1).T.dot(delta[-1])
+				#For the current layer(hidden), we need to pull delta from downstream or next layer.
+				#The weight matrix which connects the current layer(hidden) and the 
+				#next layer(may be output) is attached to the output layer and so pulling back it using self.weights(index+!)
+				#we need to transpose them because the weight matrix in different format
+				delta_pullback = self.weights[index+1].T.dot(delta[-1])
+				#taking delta from all nodes in next layer, except the last tow, because thats from bias.
+				#And so using delta_pullback[:-1, :]) --> all rows except last and all columns
 				delta.append(delta_pullback[:-1, :]) * self.sgm(self._LayerInput[index],True))
+
+
+		#Compute weight deltas
+		for index in range(self.LayerCount):
+			delta_index = self.LayerCount - 1 - index
+
+			if index == 0:
+				Layeroutput = np.vstack(input.T,np.ones([1,lnCases]))
+			else:
+				Layeroutput = np.vstack(self._LayerOutput[index-1],np.ones(1,self._LayerOutput[index-1]))
+				
 
 
 	#Transfer Functions
@@ -105,6 +129,8 @@ if __name__ == '__main__':
 	lvOutput = bpn.Run(lvInput)
 
 	print "Input: {0}\n Output: {1}".format(lvInput,lvOutput)
+
+
 
 
 
