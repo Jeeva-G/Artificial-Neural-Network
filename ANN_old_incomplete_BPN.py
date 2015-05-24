@@ -1,3 +1,4 @@
+#Referenced this -- > https://www.youtube.com/watch?v=XqRUHEeiyCs&list=PLRyu4ecIE9tibdzuhJr94uQeKnOFkkbq6&index=1
 #imports
 import numpy as np 
 
