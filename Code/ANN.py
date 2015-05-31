@@ -74,18 +74,35 @@ class MLP:
 
         # Compute error on output layer
         error = target - self.layers[-1]
+        # After calculating the error for output layer, we are multiplying the error of a layer with that layer's value
+        # We need the actual value we had before applying activation function and so applying derivative of that function
+        # Then multiplying that error with actual value to get delta which is the new weight to be added with old weight
         delta = error*dsigmoid(self.layers[-1])
         deltas.append(delta)
+        #print deltas
+
 
         # Compute error on hidden layers
+        # To come backwards -- > range(len(self.shape)-2,0,-1) For example, 
+        # print range(len((3,3,3,4,3,5,6))-2,0,-1)  --> [5, 4, 3, 2, 1]
+        # we are coming from backwards to calculate the delta value for each hidden layer from last.
+        # To calculate the delta for each hidden layer, we need to multiply the output layer delta with the weight of that
+        # hidden layer and acual value before applying activation function on that layer.
         for i in range(len(self.shape)-2,0,-1):
             delta = np.dot(deltas[0],self.weights[i].T)*dsigmoid(self.layers[i])
+            # We are adding up the delta in the very starting and so using deltas.insert(0,delta). 
+            # We are doing this because we are calculating the delta from backwards and so stacking up 
+            # to build the delta matrix. 
             deltas.insert(0,delta)
-            
-        # Update weights
+        #print deltas 
+        # Update weights for each layer
         for i in range(len(self.weights)):
+        	# Getting data for a particular layer to multiply and make sure it is two dimensional array
             layer = np.atleast_2d(self.layers[i])
+            # Getting delta for that particular layer
             delta = np.atleast_2d(deltas[i])
+            # Adding up the delta weight with the old weight & multiply it by learning rate(to make sure that the 
+            # weight changes according to our learning rate) and momentum to minimize the oscillation..
             dw = np.dot(layer.T,delta)
             self.weights[i] += lrate*dw + momentum*self.dw[i]
             self.dw[i] = dw
@@ -97,7 +114,7 @@ if __name__ == '__main__':
     import matplotlib
     import matplotlib.pyplot as plt
 
-    def learn(network,samples, epochs=2500, lrate=.1, momentum=0.1):
+    def learn(network,samples, epochs=5000, lrate=.1, momentum=0.1):
         # Train 
         for i in range(epochs):
             n = np.random.randint(samples.size)
@@ -112,8 +129,7 @@ if __name__ == '__main__':
 
     network = MLP(2,2,1)
     samples = np.zeros(4, dtype=[('input',  float, 2), ('output', float, 1)])
-
-
+    learn(network,samples)
 
 # Example 1 : OR logical function
 # -------------------------------------------------------------------------
